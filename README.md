@@ -82,7 +82,7 @@ Body:
 
 ```json
 {
-  "title": "Complete Practical 9",
+  "title": "Complete Practical 4 to 10",
   "description": "Implement node-cache",
   "completed": false
 }
@@ -173,3 +173,83 @@ git init
 git add .
 git commit -m "Implement Practical 9 in-memory caching"
 ```
+# Practical 10 - Asynchronous Processing with Event-Driven Architecture
+
+## Objective
+
+Implement asynchronous processing using Event-Driven Architecture in the Task Manager application.
+
+## Architecture
+
+The application uses Node.js EventEmitter as an in-process event bus.
+
+Task events:
+
+- task.created
+- task.updated
+- task.deleted
+
+## Event Flow
+
+Client
+↓
+Express API
+↓
+MongoDB
+↓
+Event Bus
+↓
+Event Handler
+↓
+Asynchronous Processing
+
+## Event-Driven Processing
+
+When a task is created, updated, or deleted, the application publishes an event.
+
+The event handler receives the event and performs asynchronous processing without adding the processing logic directly into the task API route.
+
+## Technologies
+
+- Node.js
+- Express.js
+- MongoDB
+- Mongoose
+- Node.js EventEmitter
+- Async/Await
+
+## Testing
+
+### Create Task
+
+POST /tasks
+
+Example:
+
+{
+  "title": "Learn Event Driven Architecture",
+  "description": "Implement asynchronous processing",
+  "completed": false
+}
+
+### Update Task
+
+PUT /tasks/:id
+
+### Delete Task
+
+DELETE /tasks/:id
+
+## Expected Event Logs
+
+EVENT RECEIVED: task.created
+Processing task asynchronously
+ASYNC PROCESSING COMPLETED
+
+## Advantages
+
+1. Loose coupling
+2. Asynchronous processing
+3. Better scalability
+4. Easier integration
+5. Separation of responsibilities

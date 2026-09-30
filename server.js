@@ -1,7 +1,11 @@
 const express = require("express");
 const mongoose = require("mongoose");
+
 const dotenv = require("dotenv");
 const cache = require("./cache/cache");
+const eventBus = require("./events/eventBus");
+
+require("./events/taskEvents");
 
 dotenv.config();
 
@@ -94,15 +98,18 @@ app.post("/tasks", async (req, res) => {
       return res.status(400).json({ error: "Title is required" });
     }
 
-    const task = await Task.create({
-      title,
-      description,
-      completed
-    });
+const task = await Task.create({
+  title,
+  description,
+  completed
+});
 
-    invalidateTaskCache();
+invalidateTaskCache();
 
-    res.status(201).json(task);
+// Publish event
+eventBus.emit("task.created", task);
+
+res.status(201).json(task);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Something went wrong" });
@@ -122,10 +129,13 @@ app.put("/tasks/:id", async (req, res) => {
       return res.status(404).json({ error: "Task not found" });
     }
 
-    invalidateTaskCache();
-    cache.del(`task_${req.params.id}`);
+invalidateTaskCache();
+cache.del(`task_${req.params.id}`);
 
-    res.json(task);
+// Publish event
+eventBus.emit("task.updated", task);
+
+res.json(task);
   } catch (error) {
     res.status(400).json({ error: "Invalid task ID or data" });
   }
@@ -134,16 +144,19 @@ app.put("/tasks/:id", async (req, res) => {
 // DELETE
 app.delete("/tasks/:id", async (req, res) => {
   try {
-    const task = await Task.findByIdAndDelete(req.params.id);
+const task = await Task.findByIdAndDelete(req.params.id);
 
-    if (!task) {
-      return res.status(404).json({ error: "Task not found" });
-    }
+if (!task) {
+  return res.status(404).json({ error: "Task not found" });
+}
 
-    invalidateTaskCache();
-    cache.del(`task_${req.params.id}`);
+invalidateTaskCache();
+cache.del(`task_${req.params.id}`);
 
-    res.json({ message: "Task deleted successfully" });
+// Publish event
+eventBus.emit("task.deleted", task);
+
+res.json({ message: "Task deleted successfully" });
   } catch (error) {
     res.status(400).json({ error: "Invalid task ID" });
   }
